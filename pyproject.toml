@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "dl4nlp"
+version = "0.1.0"
+description = "Multilingual Neural Machine Translation for Low-Resource Languages"
+authors = ["Dominykas Seputis, Szymon Budziak, Quim Serra Faber, Jozef Ciz"]
+readme = "README.md"
+packages = [{ include = "src", from = "." }]
+
+[tool.poetry.dependencies]
+python = ">=3.11,<3.12"
+transformers = "^4.44.2"
+
+[tool.poetry.group.dev.dependencies]
+notebook = "^7.2.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
