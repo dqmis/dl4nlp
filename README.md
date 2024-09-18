@@ -14,4 +14,5 @@ The project uses Poetry to manage dependencies. To install the dependencies, run
 
 ```bash
 poetry install
+poetry run pre-commit install
 ```
