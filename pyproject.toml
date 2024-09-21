@@ -9,6 +9,7 @@ packages = [{ include = "src", from = "." }]
 [tool.poetry.dependencies]
 python = ">=3.11,<3.12"
 transformers = "^4.44.2"
+google-generativeai = "^0.8.1"
 
 [tool.poetry.group.dev.dependencies]
 notebook = "^7.2.2"
@@ -73,5 +74,5 @@ strict_equality = true
 
 [[tool.mypy.overrides]]
 # Put dependencie's name here if mypy fails to import stubs
-module = ["scipy.*"]
+module = ["scipy.*", "google.*"]
 ignore_missing_imports = true
