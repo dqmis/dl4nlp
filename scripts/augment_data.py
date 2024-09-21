@@ -4,7 +4,7 @@ from src.augmentors.llm_api.gemini_api import GeminiAPI
 from src.augmentors.llm_augmentor import LLMAugmentor
 
 
-def main(dataset_path, output_path):
+def main(dataset_path: str, output_path: str) -> None:
     with open(dataset_path) as f:
         dataset = f.readlines()
 
