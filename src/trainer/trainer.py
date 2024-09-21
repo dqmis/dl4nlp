@@ -14,48 +14,87 @@ DatasetType = type[DatasetDict | Dataset | IterableDatasetDict | IterableDataset
 
 class Trainer:
     def __init__(self, checkpoint: str) -> None:
+        """
+        Initialize the Trainer class with the given checkpoint
+
+        Args:
+            checkpoint (str): The checkpoint (model) to initialize the Trainer with.
+        """
         self.tokenizer = AutoTokenizer.from_pretrained(checkpoint)
         self._model = AutoModelForSeq2SeqLM.from_pretrained(checkpoint)
 
         self._data_collator = DataCollatorForSeq2Seq(tokenizer=self.tokenizer, model=checkpoint)
 
     def train(self, training_args: Seq2SeqTrainingArguments, dataset: DatasetType) -> None:
+        """
+        Train the model with the given training dataset along with the training arguments.
+
+        Args:
+            training_args (Seq2SeqTrainingArguments): The training arguments.
+            dataset (DatasetType): The dataset to train the model on.
+
+        Returns:
+            None
+        """
         trainer = Seq2SeqTrainer(
             model=self._model,
-            tokenizer=self.tokenizer,
             args=training_args,
             train_dataset=dataset["train"],
             eval_dataset=dataset["test"],
+            tokenizer=self.tokenizer,
             data_collator=self._data_collator,
-            compute_metrics=self._compute_metrics,
+            compute_metrics=self.__compute_metrics,
         )
 
         trainer.train()
 
-    def _postprocess_text(
-        self, preds: list[str], labels: list[str]
-    ) -> tuple[list[str], list[str]]:
+    @staticmethod
+    def __postprocess_text(preds: list[str], labels: list[str]) -> tuple[list[str], list[str]]:
+        """
+        Postprocess the given predictions and labels.
+
+        Args:
+            preds (list[str]): The predictions.
+            labels (list[str]): The labels.
+
+        Returns:
+            tuple[list[str], list[str]]: The postprocessed predictions and labels
+        """
         preds = [pred.strip() for pred in preds]
         labels = [[label.strip()] for label in labels]  # type: ignore
 
         return preds, labels
 
-    def _compute_metrics(self, eval_preds: tuple[np.ndarray, np.ndarray]) -> dict[str, float]:
+    def __compute_metrics(self, eval_preds: tuple[np.ndarray, np.ndarray]) -> dict[str, float]:
+        """
+        Compute the metrics for the given evaluation predictions.
+
+        Args:
+            eval_preds (tuple[np.ndarray, np.ndarray]): The evaluation predictions.
+
+        Returns:
+            dict[str, float]: The computed metrics.
+        """
         metric = evaluate.load("sacrebleu")
 
         preds, labels = eval_preds
+
         if isinstance(preds, tuple):
             preds = preds[0]
+
+        # decode the predictions and labels in batches
         decoded_preds = self.tokenizer.batch_decode(preds, skip_special_tokens=True)
 
         labels = np.where(labels != -100, labels, self.tokenizer.pad_token_id)
         decoded_labels = self.tokenizer.batch_decode(labels, skip_special_tokens=True)
 
-        decoded_preds, decoded_labels = self._postprocess_text(decoded_preds, decoded_labels)
+        decoded_preds, decoded_labels = self.__postprocess_text(decoded_preds, decoded_labels)
 
+        # compute the SacreBLEU score
         result = metric.compute(predictions=decoded_preds, references=decoded_labels)
         result = {"bleu": result["score"]}
 
+        # compute the average prediction length
         prediction_lens = [np.count_nonzero(pred != self.tokenizer.pad_token_id) for pred in preds]
         result["gen_len"] = np.mean(prediction_lens)
         return {k: round(v, 4) for k, v in result.items()}
