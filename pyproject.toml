@@ -10,6 +10,12 @@ packages = [{ include = "src", from = "." }]
 python = ">=3.11,<3.12"
 transformers = "^4.44.2"
 google-generativeai = "^0.8.1"
+datasets = "^3.0.0"
+evaluate = "^0.4.3"
+torch = "^2.4.1"
+accelerate = "^0.34.2"
+sacrebleu = "^2.4.3"
+pyyaml = "^6.0.2"
 
 [tool.poetry.group.dev.dependencies]
 notebook = "^7.2.2"
@@ -20,6 +26,7 @@ pre-commit = "^3.8.0"
 flake8 = "^7.1.1"
 isort = "^5.13.2"
 flake8-pyproject = "^1.2.3"
+types-pyyaml = "^6.0.12.20240917"
 
 
 [build-system]
@@ -74,5 +81,5 @@ strict_equality = true
 
 [[tool.mypy.overrides]]
 # Put dependencie's name here if mypy fails to import stubs
-module = ["scipy.*", "google.*"]
+module = ["scipy.*", "google.*", "transformers.*", "datasets.*", "evaluate.*"]
 ignore_missing_imports = true
