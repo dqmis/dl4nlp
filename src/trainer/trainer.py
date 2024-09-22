@@ -1,3 +1,5 @@
+import os
+
 import evaluate
 import numpy as np
 from datasets import Dataset, DatasetDict, IterableDataset, IterableDatasetDict
@@ -10,6 +12,9 @@ from transformers import (
 )
 
 DatasetType = type[DatasetDict | Dataset | IterableDatasetDict | IterableDataset]
+
+
+os.environ["WANDB_PROJECT"] = "dl4nlp"
 
 
 class Trainer:
@@ -25,17 +30,29 @@ class Trainer:
 
         self._data_collator = DataCollatorForSeq2Seq(tokenizer=self.tokenizer, model=checkpoint)
 
-    def train(self, training_args: Seq2SeqTrainingArguments, dataset: DatasetType) -> None:
+    def train(
+        self,
+        training_args: Seq2SeqTrainingArguments,
+        dataset: DatasetType,
+        use_wandb: bool = False,
+    ) -> None:
         """
         Train the model with the given training dataset along with the training arguments.
 
         Args:
             training_args (Seq2SeqTrainingArguments): The training arguments.
             dataset (DatasetType): The dataset to train the model on.
+            use_wandb (bool, optional): Whether to use Weights & Biases for logging.
+
 
         Returns:
             None
         """
+
+        if use_wandb:
+            training_args.report_to = "wandb"
+            training_args.logging_steps = 1
+
         trainer = Seq2SeqTrainer(
             model=self._model,
             args=training_args,
@@ -43,13 +60,14 @@ class Trainer:
             eval_dataset=dataset["test"],
             tokenizer=self.tokenizer,
             data_collator=self._data_collator,
-            compute_metrics=self.__compute_metrics,
+            compute_metrics=self._compute_metrics,
         )
 
         trainer.train()
 
-    @staticmethod
-    def __postprocess_text(preds: list[str], labels: list[str]) -> tuple[list[str], list[str]]:
+    def _postprocess_text(
+        self, preds: list[str], labels: list[str]
+    ) -> tuple[list[str], list[str]]:
         """
         Postprocess the given predictions and labels.
 
@@ -65,7 +83,7 @@ class Trainer:
 
         return preds, labels
 
-    def __compute_metrics(self, eval_preds: tuple[np.ndarray, np.ndarray]) -> dict[str, float]:
+    def _compute_metrics(self, eval_preds: tuple[np.ndarray, np.ndarray]) -> dict[str, float]:
         """
         Compute the metrics for the given evaluation predictions.
 
@@ -88,7 +106,7 @@ class Trainer:
         labels = np.where(labels != -100, labels, self.tokenizer.pad_token_id)
         decoded_labels = self.tokenizer.batch_decode(labels, skip_special_tokens=True)
 
-        decoded_preds, decoded_labels = self.__postprocess_text(decoded_preds, decoded_labels)
+        decoded_preds, decoded_labels = self._postprocess_text(decoded_preds, decoded_labels)
 
         # compute the SacreBLEU score
         result = metric.compute(predictions=decoded_preds, references=decoded_labels)
