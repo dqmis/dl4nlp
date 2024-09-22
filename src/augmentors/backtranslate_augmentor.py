@@ -12,7 +12,8 @@ class BacktranslateAugmentor(BaseAugmentor):
         self._translator_to = pipeline(self._task_to, model=to_model)
 
     def _augment(self, data: list[str]) -> list[str]:
-        translated_text = [i["translation_text"] for i in self._translator_from(data)]
-        backtranslated_text = [i["translation_text"] for i in self._translator_to(translated_text)]
-
-        return backtranslated_text
+        translated_texts = [result["translation_text"] for result in self._translator_from(data)]
+        backtranslated_texts = [
+            result["translation_text"] for result in self._translator_to(translated_texts)
+        ]
+        return backtranslated_texts
