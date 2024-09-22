@@ -1,14 +1,12 @@
 import yaml
 from transformers import AutoTokenizer
 
-__all__ = ["preprocess_function", "load_config"]
-
 
 def preprocess_function(
     examples: dict, tokenizer: AutoTokenizer, source_lang: str, target_lang: str, prefix: str
 ) -> dict:
     """
-    Preprocess the given examples with the given tokenizer, source language, target language, and prefix.
+    Preprocess the given examples with the given tokenizer, source language, target language, and prefix. # noqa
 
     Args:
         examples (dict): The examples to preprocess.
@@ -36,6 +34,6 @@ def load_config(config_file: str) -> dict[str, str]:
     Returns:
         dict: The configuration file as a dictionary.
     """
-    with open(config_file, "r") as file:
+    with open(config_file) as file:
         config: dict[str, str] = yaml.safe_load(file)
     return config
