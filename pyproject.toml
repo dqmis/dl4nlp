@@ -17,6 +17,7 @@ accelerate = "^0.34.2"
 sacrebleu = "^2.4.3"
 pyyaml = "^6.0.2"
 wandb = "^0.18.1"
+sentencepiece = "^0.2.0"
 
 [tool.poetry.group.dev.dependencies]
 notebook = "^7.2.2"
