@@ -12,7 +12,7 @@ OUT_DIR = Path(__file__).resolve().parent.parent / "out"
 
 
 def build_run_name(config: dict) -> str:
-    return f"{Path(config['checkpoint']).name}-{Path(config['dataset']).name}-{config['source_lang']}-{config['target_lang']}"
+    return f"{Path(config['checkpoint']).name}-{Path(config['dataset']).name}-{config['source_lang']}-{config['target_lang']}"  # noqa
 
 
 def get_training_arguments(cfg: dict) -> Seq2SeqTrainingArguments:
