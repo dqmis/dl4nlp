@@ -1,38 +1,62 @@
-from datasets import load_dataset
+import sys
+from pathlib import Path
+
 from transformers import Seq2SeqTrainingArguments
 
 from src.trainer import Trainer
-from src.utils import preprocess_function, load_config
+from src.utils import load_config
+from src.utils.datasets import DATASETS
+
+CONFIG_DIR = Path(__file__).resolve().parent.parent / "configs"
+OUT_DIR = Path(__file__).resolve().parent.parent / "out"
 
 
-def main() -> None:
-    # Load the training configuration
-    train_config = load_config("../config/train_config.yaml")
+def build_run_name(config: dict) -> str:
+    return f"{Path(config['checkpoint']).name}-{Path(config['dataset']).name}-{config['source_lang']}-{config['target_lang']}"
 
-    trainer = Trainer(train_config["checkpoint"])
 
-    books = load_dataset("opus_books", "en-fr")
-    books = books["train"].shuffle(seed=42).select(range(1000))
-    books = books.train_test_split(test_size=0.2)
+def get_training_arguments(cfg: dict) -> Seq2SeqTrainingArguments:
+    training_args = cfg["training_args"]
+    training_args["run_name"] = build_run_name(cfg)
+    training_args["output_dir"] = (OUT_DIR / training_args["run_name"]).resolve()
+    return Seq2SeqTrainingArguments(**training_args)
 
-    # Apply the preprocess function to dataset
-    tokenized_books = books.map(
-        preprocess_function,
-        batched=True,
-        fn_kwargs={
-            "tokenizer": trainer.tokenizer,
-            "source_lang": train_config["source_lang"],
-            "target_lang": train_config["target_lang"],
-            "prefix": train_config["prefix"],
-        },
+
+def get_dataset(cfg: dict, trainer) -> dict:
+    return DATASETS["helsinki"](
+        cfg["dataset"],
+        cfg["source_lang"],
+        cfg["target_lang"],
+        cfg["prefix"],
+        trainer.tokenizer,
+        cfg.get("dataset_sample", 100),
     )
 
-    # Define the training hyperparameters by calling Seq2SeqTrainingArguments
-    training_args = Seq2SeqTrainingArguments(**train_config["training_args"])
 
-    # Train the model using Seq2SeqTrainer
-    trainer.train(training_args, tokenized_books)
+def evaluate_flores(trainer, cfg: dict) -> None:
+    test_set_flores = DATASETS["flores"](
+        cfg["source_lang_flores"], cfg["target_lang_flores"], trainer.tokenizer
+    )
+    trainer.evaluate(test_set_flores["devtest"], "flores")
+
+
+def main(config_name: str = "train_config") -> None:
+    cfg = load_config((CONFIG_DIR / f"{config_name}.yaml").resolve())
+    trainer = Trainer(
+        cfg["checkpoint"], source_lang=cfg["source_lang"], target_lang=cfg["target_lang"]
+    )
+
+    # Get training arguments and dataset
+    training_args = get_training_arguments(cfg)
+    dataset = get_dataset(cfg, trainer)
+
+    # Train or evaluate model
+    trainer.train(training_args, dataset, only_eval=cfg["only_eval"])
+
+    # Evaluate on FLORES dataset
+    evaluate_flores(trainer, cfg)
 
 
 if __name__ == "__main__":
-    main()
+    config_name = sys.argv[1] if len(sys.argv) > 1 else "train_config"
+    main(config_name)
