@@ -38,6 +38,13 @@ def evaluate_flores(trainer, cfg: dict) -> None:
         cfg["source_lang_flores"], cfg["target_lang_flores"], trainer.tokenizer
     )
     trainer.evaluate(test_set_flores["devtest"], "flores")
+    
+
+def evaluate_ccaligned(trainer, cfg: dict) -> None:
+    test_set_ccaligned = DATASETS["ccaligned"](
+        cfg["source_lang"], cfg["target_lang"], trainer.tokenizer
+    )
+    trainer.evaluate(test_set_ccaligned["test"], "ccaligned")
 
 
 def main(config_name: str = "train_config") -> None:
@@ -55,6 +62,9 @@ def main(config_name: str = "train_config") -> None:
 
     # Evaluate on FLORES dataset
     evaluate_flores(trainer, cfg)
+
+    # Evaluate on CCAligned dataset
+    evaluate_ccaligned(trainer, cfg)
 
 
 if __name__ == "__main__":
