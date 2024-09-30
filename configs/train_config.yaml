@@ -4,7 +4,10 @@ target_lang: 'lt'
 source_lang_flores: 'eng'
 target_lang_flores: 'lit'
 dataset: 'Helsinki-NLP/europarl'
-#prefix: 'translate English to Lithuanian: '
+prefix: 'translate English to Lithuanian: '
+dataset_path: 'allenai/nllb'
+dataset_name: 'eng_Latn-lit_Latn'
+dataset_output_path: 'data/nllb_eng_lit'
 only_eval: True
 training_args:
   learning_rate: 0.00002
