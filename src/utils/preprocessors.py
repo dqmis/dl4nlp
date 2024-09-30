@@ -51,3 +51,23 @@ def preprocess_flores_function(
         truncation=True,
     )
     return model_inputs
+    
+
+def preprocess_ccaligned_function(
+    examples: dict, tokenizer: AutoTokenizer, source_lang: str, target_lang: str
+) -> dict:
+    """
+    Preprocess CCAligned dataset with the given tokenizer, source language, and target language.
+    """
+    source_key = f"sentence_{source_lang}_Latn"
+    target_key = f"sentence_{target_lang}_Latn"
+
+    inputs = [example for example in examples[source_key]]
+    targets = [example for example in examples[target_key]]
+    model_inputs: dict = tokenizer(
+        inputs,
+        text_target=targets,
+        max_length=128,
+        truncation=True,
+    )
+    return model_inputs
