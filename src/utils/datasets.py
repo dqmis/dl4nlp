@@ -13,6 +13,9 @@ DATASETS = {
     "helsinki": lambda dataset_name, source_lang, target_lang, prefix, tokenizer, sample: load_helsinki_dataset(  # noqa
         dataset_name, source_lang, target_lang, prefix, tokenizer, sample
     ),
+    "ccaligned": lambda source_lang, target_lang, tokenizer: load_ccaligned_dataset(
+        source_lang, target_lang, tokenizer
+    ),
 }
 
 
@@ -28,6 +31,20 @@ def load_flores_dataset(source_lang: str, target_lang: str, tokenizer: AutoToken
             "tokenizer": tokenizer,
             "source_lang": "eng",
             "target_lang": "lit",
+        },
+    )
+    return processed_dataset
+
+
+def load_ccaligned_dataset(source_lang: str, target_lang: str, tokenizer: AutoTokenizer) -> dict:
+    dataset = load_dataset("ccaligned", f"{source_lang}-{target_lang}")
+    processed_dataset: dict = dataset.map(
+        preprocess_ccaligned_function,
+        batched=True,
+        fn_kwargs={
+            "tokenizer": tokenizer,
+            "source_lang": source_lang,
+            "target_lang": target_lang,
         },
     )
     return processed_dataset
