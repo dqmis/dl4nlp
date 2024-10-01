@@ -104,9 +104,7 @@ class Trainer:
         self._trainer.evaluate(dataset, metric_key_prefix=f"test_{dataset_prefix}")
         self._fast_eval = True
 
-    def _postprocess_text(
-        self, preds: list[str], labels: list[str]
-    ) -> tuple[list[str], list[str]]:
+    def _postprocess_text(self, preds: list[str], labels: list[str]) -> tuple[list[str], list[str]]:
         """
         Postprocess the given predictions and labels.
 
