@@ -60,7 +60,7 @@ class Trainer:
             training_args.logging_steps = 1
 
         self._fast_eval = True
-
+        
         self._trainer = Seq2SeqTrainer(
             model=self._model,
             args=training_args,
@@ -104,7 +104,7 @@ class Trainer:
             tuple[list[str], list[str]]: The postprocessed predictions and labels
         """
         preds = [pred.strip() for pred in preds]
-        labels = [[label.strip()] for label in labels]  # type: ignore
+        labels = [label.strip() for label in labels]  # type: ignore
 
         return preds, labels
 
@@ -120,13 +120,13 @@ class Trainer:
         """
         sacrebleu = evaluate.load("sacrebleu")
         if not self._fast_eval:
-            bleu = evaluate.load("bleu")
-            ter = evaluate.load("ter")
+            chrf = evaluate.load("chrf")
+            comet = evaluate.load("comet")
             bertscore = evaluate.load("bertscore")
 
         result = {}
 
-        preds, labels = eval_preds
+        preds, labels, sources = eval_preds
 
         if isinstance(preds, tuple):
             preds = preds[0]
@@ -139,6 +139,8 @@ class Trainer:
 
         # decode the predictions and labels in batches
         decoded_preds = self.tokenizer.batch_decode(preds, skip_special_tokens=True)
+        
+        decoded_sources = self.tokenizer.batch_decode(sources, skip_special_tokens=True)
 
         decoded_preds, decoded_labels = self._postprocess_text(decoded_preds, decoded_labels)
 
@@ -147,14 +149,13 @@ class Trainer:
         result["sacrebleu"] = sacrebleu_result["score"]
 
         if not self._fast_eval:
-            bleu_result = bleu.compute(predictions=decoded_preds, references=decoded_labels)
-            ter_result = ter.compute(predictions=decoded_preds, references=decoded_labels)
+            chrf_score = chrf.compute(predictions=decoded_preds, references=decoded_labels)
+            comet_score = comet.compute(predictions=decoded_preds, references=decoded_labels, sources=decoded_sources)
             bertscore_result = bertscore.compute(
                 predictions=decoded_preds, references=decoded_labels, lang=self._target_lang
             )
-
-            result["bleu"] = bleu_result["bleu"]
-            result["ter"] = ter_result["score"]
+            result["chrf"] = chrf_score["score"]
+            result["comet"] = np.array(comet_score["scores"]).mean()
             result["bertscore"] = np.array(bertscore_result["f1"]).mean()
 
         # compute the average prediction length

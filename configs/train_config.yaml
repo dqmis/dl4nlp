@@ -1,10 +1,10 @@
-checkpoint: 'google-t5/t5-small'
+checkpoint: 'Helsinki-NLP/opus-mt-tc-big-en-lt'
 source_lang: 'en'
 target_lang: 'lt'
 source_lang_flores: 'eng'
 target_lang_flores: 'lit'
 dataset: 'Helsinki-NLP/europarl'
-prefix: 'translate English to Lithuanian: '
+#prefix: 'translate English to Lithuanian: '
 only_eval: False
 training_args:
   output_dir: '../out/my_awesome_opus_books_model'
@@ -13,8 +13,11 @@ training_args:
   per_device_train_batch_size: 16
   per_device_eval_batch_size: 16
   weight_decay: 0.01
+  load_best_model_at_end: True
   save_total_limit: 3
-  num_train_epochs: 1
+  logging_steps: 1
+  num_train_epochs: 10
   predict_with_generate: True
-  fp16: False
+  fp16: True
+  include_inputs_for_metrics: True
   push_to_hub: False

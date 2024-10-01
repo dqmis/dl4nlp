@@ -19,6 +19,8 @@ def get_training_arguments(cfg: dict) -> Seq2SeqTrainingArguments:
     training_args = cfg["training_args"]
     training_args["run_name"] = build_run_name(cfg)
     training_args["output_dir"] = (OUT_DIR / training_args["run_name"]).resolve()
+    training_args["save_strategy"] = "epoch"
+    training_args["eval_strategy"] = "epoch"
     return Seq2SeqTrainingArguments(**training_args)
 
 
@@ -27,7 +29,7 @@ def get_dataset(cfg: dict, trainer) -> dict:
         cfg["dataset"],
         cfg["source_lang"],
         cfg["target_lang"],
-        cfg["prefix"],
+        cfg.get("prefix", ""),
         trainer.tokenizer,
         cfg.get("dataset_sample", 100),
     )
@@ -35,6 +37,12 @@ def get_dataset(cfg: dict, trainer) -> dict:
 
 def evaluate_flores(trainer, cfg: dict) -> None:
     test_set_flores = DATASETS["flores"](
+        cfg["source_lang_flores"], cfg["target_lang_flores"], trainer.tokenizer
+    )
+    trainer.evaluate(test_set_flores["devtest"], "flores")
+    
+def evaluate_ntrex(trainer, cfg: dict) -> None:
+    test_set_flores = DATASETS["ntrex"](
         cfg["source_lang_flores"], cfg["target_lang_flores"], trainer.tokenizer
     )
     trainer.evaluate(test_set_flores["devtest"], "flores")

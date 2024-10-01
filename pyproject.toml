@@ -17,11 +17,11 @@ accelerate = "^0.34.2"
 sacrebleu = "^2.4.3"
 pyyaml = "^6.0.2"
 wandb = "^0.18.1"
-sentencepiece = "^0.2.0"
 bleurt = {git = "https://github.com/google-research/bleurt.git"}
 tensorflow = "^2.17.0"
 tf-keras = "^2.17.0"
 bert-score = "^0.3.13"
+unbabel-comet = "^2.2.2"
 
 [tool.poetry.group.dev.dependencies]
 notebook = "^7.2.2"
