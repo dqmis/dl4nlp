@@ -4,7 +4,7 @@ from pathlib import Path
 from transformers import Seq2SeqTrainingArguments
 
 from src.trainer import Trainer
-from src.utils import load_config
+from src.utils import load_config, populate_training_args
 from src.utils.datasets import DATASETS
 
 CONFIG_DIR = Path(__file__).resolve().parent.parent / "configs"
@@ -17,10 +17,10 @@ def build_run_name(config: dict) -> str:
 
 def get_training_arguments(cfg: dict) -> Seq2SeqTrainingArguments:
     training_args = cfg["training_args"]
+    training_args = populate_training_args(training_args)
     training_args["run_name"] = build_run_name(cfg)
     training_args["output_dir"] = (OUT_DIR / training_args["run_name"]).resolve()
-    training_args["save_strategy"] = "epoch"
-    training_args["eval_strategy"] = "epoch"
+
     return Seq2SeqTrainingArguments(**training_args)
 
 
@@ -31,7 +31,6 @@ def get_dataset(cfg: dict, trainer) -> dict:
         cfg["target_lang"],
         cfg.get("prefix", ""),
         trainer.tokenizer,
-        cfg.get("dataset_sample", 100),
     )
 
 
@@ -40,7 +39,8 @@ def evaluate_flores(trainer, cfg: dict) -> None:
         cfg["source_lang_flores"], cfg["target_lang_flores"], trainer.tokenizer
     )
     trainer.evaluate(test_set_flores["devtest"], "flores")
-    
+
+
 def evaluate_ntrex(trainer, cfg: dict) -> None:
     test_set_flores = DATASETS["ntrex"](
         cfg["source_lang_flores"], cfg["target_lang_flores"], trainer.tokenizer

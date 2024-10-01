@@ -60,7 +60,7 @@ class Trainer:
             training_args.logging_steps = 1
 
         self._fast_eval = True
-        
+
         self._trainer = Seq2SeqTrainer(
             model=self._model,
             args=training_args,
@@ -104,11 +104,13 @@ class Trainer:
             tuple[list[str], list[str]]: The postprocessed predictions and labels
         """
         preds = [pred.strip() for pred in preds]
-        labels = [label.strip() for label in labels]  # type: ignore
+        labels = [label.strip() for label in labels]
 
         return preds, labels
 
-    def _compute_metrics(self, eval_preds: tuple[np.ndarray, np.ndarray]) -> dict[str, float]:
+    def _compute_metrics(
+        self, eval_preds: tuple[np.ndarray, np.ndarray, np.ndarray]
+    ) -> dict[str, float]:
         """
         Compute the metrics for the given evaluation predictions.
 
@@ -139,7 +141,7 @@ class Trainer:
 
         # decode the predictions and labels in batches
         decoded_preds = self.tokenizer.batch_decode(preds, skip_special_tokens=True)
-        
+
         decoded_sources = self.tokenizer.batch_decode(sources, skip_special_tokens=True)
 
         decoded_preds, decoded_labels = self._postprocess_text(decoded_preds, decoded_labels)
@@ -150,7 +152,9 @@ class Trainer:
 
         if not self._fast_eval:
             chrf_score = chrf.compute(predictions=decoded_preds, references=decoded_labels)
-            comet_score = comet.compute(predictions=decoded_preds, references=decoded_labels, sources=decoded_sources)
+            comet_score = comet.compute(
+                predictions=decoded_preds, references=decoded_labels, sources=decoded_sources
+            )
             bertscore_result = bertscore.compute(
                 predictions=decoded_preds, references=decoded_labels, lang=self._target_lang
             )

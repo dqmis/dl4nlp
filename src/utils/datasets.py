@@ -10,8 +10,8 @@ DATASETS = {
     "flores": lambda source_lang, target_lang, tokenizer: load_flores_dataset(
         source_lang, target_lang, tokenizer
     ),
-    "helsinki": lambda dataset_name, source_lang, target_lang, prefix, tokenizer, sample: load_helsinki_dataset(  # noqa
-        dataset_name, source_lang, target_lang, prefix, tokenizer, sample
+    "helsinki": lambda dataset_name, source_lang, target_lang, prefix, tokenizer: load_helsinki_dataset(  # noqa
+        dataset_name, source_lang, target_lang, prefix, tokenizer
     ),
 }
 
@@ -39,10 +39,9 @@ def load_helsinki_dataset(
     target_lang: str,
     prefix: str,
     tokenizer: AutoTokenizer,
-    sample: float = 100,
 ) -> dict:
     dataset = load_dataset(dataset_name, f"{source_lang}-{target_lang}")
-    dataset = dataset["train"].shuffle(seed=42).select(range(int(len(dataset) * sample)))
+    dataset = dataset["train"].shuffle(seed=42)
     dataset = dataset.train_test_split(test_size=0.2)
 
     # Apply the preprocess function to dataset

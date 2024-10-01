@@ -1,5 +1,6 @@
 from transformers import AutoTokenizer
 
+
 def preprocess_ntrex_function(
     source_examples: dict, target_examples: dict, tokenizer: AutoTokenizer
 ) -> dict:
@@ -26,6 +27,7 @@ def preprocess_ntrex_function(
         truncation=True,
     )
     return model_inputs
+
 
 def preprocess_helsinki_function(
     examples: dict, tokenizer: AutoTokenizer, source_lang: str, target_lang: str, prefix: str
