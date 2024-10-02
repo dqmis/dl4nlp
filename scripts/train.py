@@ -5,7 +5,7 @@ from transformers import Seq2SeqTrainingArguments
 
 from src.trainer import Trainer
 from src.utils import load_config, populate_training_args
-from src.utils.datasets import DATASETS
+from src.utils.dataset import DATASETS
 
 CONFIG_DIR = Path(__file__).resolve().parent.parent / "configs"
 OUT_DIR = Path(__file__).resolve().parent.parent / "out"
