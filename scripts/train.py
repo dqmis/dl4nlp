@@ -42,10 +42,10 @@ def evaluate_flores(trainer, cfg: dict) -> None:
 
 
 def evaluate_ntrex(trainer, cfg: dict) -> None:
-    test_set_flores = DATASETS["ntrex"](
+    test_set_ntrex = DATASETS["ntrex"](
         cfg["source_lang_flores"], cfg["target_lang_flores"], trainer.tokenizer
     )
-    trainer.evaluate(test_set_flores["devtest"], "flores")
+    trainer.evaluate(test_set_ntrex, "ntrex")
 
 
 def main(config_name: str = "train_config") -> None:
@@ -62,6 +62,7 @@ def main(config_name: str = "train_config") -> None:
     trainer.train(training_args, dataset, only_eval=cfg["only_eval"])
 
     # Evaluate on FLORES dataset
+    evaluate_ntrex(trainer, cfg)
     evaluate_flores(trainer, cfg)
 
 
