@@ -25,11 +25,11 @@ def get_training_arguments(cfg: dict) -> Seq2SeqTrainingArguments:
 
 
 def get_dataset(cfg: dict, trainer) -> dict:
-    return DATASETS["helsinki"](
+    return DATASETS["nllb"](
         cfg["dataset"],
         cfg["source_lang"],
         cfg["target_lang"],
-        cfg.get("prefix", ""),
+        # cfg.get("prefix", ""),
         trainer.tokenizer,
     )
 
@@ -38,11 +38,7 @@ def evaluate_flores(trainer, cfg: dict) -> None:
     test_set_flores = DATASETS["flores"](
         cfg["source_lang_flores"], cfg["target_lang_flores"], trainer.tokenizer
     )
-    trainer.evaluate("flores", test_set_flores["devtest"])
-
-
-def evaluate_lithuanian(trainer) -> None:
-    trainer.evaluate("lithuanian-english")
+    trainer.evaluate(test_set_flores["devtest"], "flores")
 
 
 def evaluate_ntrex(trainer, cfg: dict) -> None:
@@ -58,17 +54,12 @@ def main(config_name: str = "train_config") -> None:
         cfg["checkpoint"], source_lang=cfg["source_lang"], target_lang=cfg["target_lang"]
     )
 
-    trainer.download_and_save_dataset(
-        cfg["dataset_path"],
-        cfg["dataset_name"],
-    )
-
     # Get training arguments and dataset
     training_args = get_training_arguments(cfg)
-    # dataset = get_dataset(cfg, trainer)
+    dataset = get_dataset(cfg, trainer)
 
     # Train or evaluate model
-    trainer.train(training_args, only_eval=cfg["only_eval"])
+    trainer.train(training_args, dataset, only_eval=cfg["only_eval"])
 
     # Evaluate on FLORES dataset
     evaluate_ntrex(trainer, cfg)

@@ -2,14 +2,7 @@ import os
 
 import evaluate
 import numpy as np
-import pandas as pd
-from datasets import (
-    Dataset,
-    DatasetDict,
-    IterableDataset,
-    IterableDatasetDict,
-    load_dataset,
-)
+from datasets import Dataset, DatasetDict, IterableDataset, IterableDatasetDict
 from transformers import (
     AutoModelForSeq2SeqLM,
     AutoTokenizer,
@@ -25,9 +18,7 @@ os.environ["WANDB_PROJECT"] = "dl4nlp"
 
 
 class Trainer:
-    def __init__(
-        self, checkpoint: str, source_lang: str, target_lang: str, data_directory: str
-    ) -> None:
+    def __init__(self, checkpoint: str, source_lang: str, target_lang: str) -> None:
         """
         Initialize the Trainer class with the given checkpoint
 
@@ -41,13 +32,13 @@ class Trainer:
 
         self._source_lang = source_lang
         self._target_lang = target_lang
-        self._data_dir = data_directory
 
         self._data_collator = DataCollatorForSeq2Seq(tokenizer=self.tokenizer, model=checkpoint)
 
     def train(
         self,
         training_args: Seq2SeqTrainingArguments,
+        dataset: DatasetType,
         use_wandb: bool = False,
         only_eval: bool = False,
     ) -> None:
@@ -70,15 +61,11 @@ class Trainer:
 
         self._fast_eval = True
 
-        # Load the train and test datasets from disk
-        train_dataset = self.load_dataset_from_disk(split="train")
-        test_dataset = self.load_dataset_from_disk(split="test")
-
         self._trainer = Seq2SeqTrainer(
             model=self._model,
             args=training_args,
-            train_dataset=train_dataset,
-            eval_dataset=test_dataset,
+            train_dataset=dataset["train"],
+            eval_dataset=dataset["test"],
             tokenizer=self.tokenizer,
             data_collator=self._data_collator,
             compute_metrics=self._compute_metrics,
@@ -89,16 +76,15 @@ class Trainer:
         else:
             print("Skipping training as only_eval is set to True")
 
-    def evaluate(self, dataset_prefix: str, dataset: DatasetType = None) -> None:
+    def evaluate(self, dataset: DatasetType, dataset_prefix: str) -> None:
         """
         Evaluate the model with the given dataset.
 
         Args:
             dataset (DatasetType): The dataset to evaluate the model on.
         """
+
         print(f"Evaluating on {dataset_prefix} dataset")
-        if dataset is None:
-            dataset = self.load_dataset_from_disk(split="test")
 
         self._fast_eval = False
         self._trainer.evaluate(dataset, metric_key_prefix=f"test_{dataset_prefix}")
@@ -178,35 +164,3 @@ class Trainer:
         prediction_lens = [np.count_nonzero(pred != self.tokenizer.pad_token_id) for pred in preds]
         result["gen_len"] = np.mean(prediction_lens)
         return {k: round(v, 4) for k, v in result.items()}
-
-    def download_and_save_dataset(self, dataset_path: str, dataset_name: str) -> None:
-        """
-        Download and save the dataset to the disk.
-
-        Args:
-            dataset_path (str): The dataset path to download.
-            dataset_name (str): The dataset name to download.
-
-        Returns:
-            None
-        """
-        print(f"Downloading and saving dataset: {dataset_path}")
-        dataset = load_dataset(dataset_path, dataset_name)
-        dataset.save_to_disk(self._data_dir)
-        dataset["train"].to_parquet(self._data_dir + "/train.parquet")
-        dataset["test"].to_parquet(self._data_dir + "/test.parquet")
-        print(f"Dataset saved to {self._data_dir}")
-
-    def load_dataset_from_disk(self, split: str) -> Dataset:
-        """
-        Loads the dataset from the saved disk location.
-
-        Args:
-            split (str): The dataset split to load (e.g., "train", "test").
-
-        Returns:
-            Dataset: The loaded dataset.
-        """
-        print(f"Loading dataset from {self._data_dir}")
-        df = pd.read_parquet(self._data_dir + f"/{split}.parquet")
-        return Dataset.from_pandas(df)

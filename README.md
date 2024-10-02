@@ -13,6 +13,14 @@ The project requires `Python ^3.11` version. Other dependencies are listed in th
 The project uses Poetry to manage dependencies. To install the dependencies, run the following command:
 
 ```bash
+poetry env use python3.11
+poetry shell
 poetry install
 poetry run pre-commit install
+```
+
+- ### Data Preparation
+
+```bash
+python scripts/download_nllb.py
 ```

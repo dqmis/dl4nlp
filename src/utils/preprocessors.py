@@ -79,3 +79,25 @@ def preprocess_flores_function(
         truncation=True,
     )
     return model_inputs
+
+
+def preprocess_nllb_function(
+    examples: dict, tokenizer: AutoTokenizer, source_lang: str, target_lang: str
+) -> dict:
+    """
+    Preprocess the given examples with the given tokenizer, source language, target language, and prefix. # noqa
+
+    Args:
+        examples (dict): The examples to preprocess.
+        tokenizer (AutoTokenizer): The tokenizer to use for preprocessing.
+        source_lang (str): The source language.
+        target_lang (str): The target language.
+        prefix (str): The prefix to use for the source language.
+
+    Returns:
+        dict: The preprocessed examples.
+    """
+    inputs = examples[source_lang]
+    targets = examples[target_lang]
+    model_inputs: dict = tokenizer(inputs, text_target=targets, max_length=128, truncation=True)
+    return model_inputs
