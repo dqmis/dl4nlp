@@ -5,14 +5,13 @@ source_lang_flores: 'eng'
 target_lang_flores: 'lit'
 dataset: 'Helsinki-NLP/europarl'
 #prefix: 'translate English to Lithuanian: '
-only_eval: False
+only_eval: True
 training_args:
   learning_rate: 0.00002
-  per_device_train_batch_size: 16
-  per_device_eval_batch_size: 16
+  per_device_train_batch_size: 32
+  per_device_eval_batch_size: 32
   weight_decay: 0.01
   save_total_limit: 3
   logging_steps: 1
-  num_train_epochs: 10
-
-  fp16: True
+  num_train_epochs: 3
+  fp16: False
