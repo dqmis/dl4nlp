@@ -1,3 +1,4 @@
+from tqdm import tqdm
 from transformers import pipeline
 
 from src.augmentors.base_augmentor import BaseAugmentor
@@ -12,7 +13,9 @@ class BacktranslateAugmentor(BaseAugmentor):
         self._translator_to = pipeline(self._task_to, model=to_model)
 
     def _augment(self, data: list[str]) -> list[str]:
-        translated_texts = [result["translation_text"] for result in self._translator_from(data)]
+        translated_texts = [
+            result["translation_text"] for result in self._translator_from(data)
+        ]
         backtranslated_texts = [
             result["translation_text"] for result in self._translator_to(translated_texts)
         ]
