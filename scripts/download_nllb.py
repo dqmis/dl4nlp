@@ -1,26 +1,54 @@
 import os
 from pathlib import Path
+import requests
 
 import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
 import tqdm
 
-PATH = Path(__file__).parent.parent / "data/opus.nllb.en-lt"
+default = "en"
+SOURCE_LANG = input(f"Enter the source language [{default}]: ") or default
+default = "lt"
+TARGET_LANG = input(f"Enter the target language [{default}]: ") or default
+
+PATH = Path(__file__).parent.parent / f"data/opus.nllb.{SOURCE_LANG}-{TARGET_LANG}"
 print(PATH)
 os.makedirs(PATH, exist_ok=True)
 
 # download the dataset from the OPUS website
-URL = "https://object.pouta.csc.fi/OPUS-NLLB/v1/moses/en-lt.txt.zip"
+URL_FORMAT = "https://object.pouta.csc.fi/OPUS-NLLB/v1/moses/{}-{}.txt.zip"
+URL = None
+for url in [
+    URL_FORMAT.format(SOURCE_LANG, TARGET_LANG),
+    URL_FORMAT.format(TARGET_LANG, SOURCE_LANG),
+]:
+    try:
+        print(f"Checking if '{url}' exists...")
+        resp = requests.head(url)
+        resp.raise_for_status()
+        URL = url
+        print(f"Found the dataset at '{url}'.")
+        break
+    except requests.HTTPError:
+        print(f"URL '{url}' does not exist.")
 
-ZIP_PATH = f"{PATH}/en-lt.txt.zip"
+if URL is None:
+    print("Could not find the dataset. Please check the languages.")
+    exit()
+
+ZIP_PATH = f"{PATH}/{SOURCE_LANG}-{TARGET_LANG}.txt.zip"
 if not os.path.exists(ZIP_PATH):
     print("Downloading the dataset...")
-    os.system(f"wget {URL} -O {ZIP_PATH}")
+    resp = os.system(f"wget {URL} -O {ZIP_PATH}")
+    if resp != 0:
+        print(f"Failed to download the dataset. Please check the URL. Response code: {resp}")
+        os.remove(ZIP_PATH)
+        exit()
 else:
     print("Dataset already downloaded.")
 
-UNZIP_PATH = f"{PATH}/en-lt.txt"
+UNZIP_PATH = f"{PATH}/{SOURCE_LANG}-{TARGET_LANG}.txt"
 if not os.path.exists(UNZIP_PATH):
     print("Unzipping the dataset...")
     os.system(f"unzip {ZIP_PATH} -d {UNZIP_PATH}")
@@ -28,15 +56,24 @@ else:
     print("Dataset already unzipped.")
 
 # read first three lines of the dataset
-FILE_PREFIX = "NLLB.en-lt"
-for suff in ["en", "lt", "scores"]:
-    with open(f"{UNZIP_PATH}/{FILE_PREFIX}.{suff}") as f:
-        print(f"First three lines of '{UNZIP_PATH}/en-lt.txt.{suff}':")
-        for i in range(3):
-            print(f.readline().strip())
-        print()
+files = {}
+for file_prefix in (f"NLLB.{SOURCE_LANG}-{TARGET_LANG}", f"NLLB.{TARGET_LANG}-{SOURCE_LANG}"):
+    for suff in [SOURCE_LANG, TARGET_LANG, "scores"]:
+        file = f"{UNZIP_PATH}/{file_prefix}.{suff}"
+        if not os.path.exists(file):
+            print(f"Could not find '{file}'.")
+            continue
+        files[suff] = file
+        with open(file) as f:
+            print(f"First three lines of '{file}':")
+            for i in range(3):
+                print(f.readline().strip())
+            print()
+assert all(
+    suff in files for suff in [SOURCE_LANG, TARGET_LANG, "scores"]
+), "Some files are missing."
 
-PARQUET_FILE = f"{PATH}/en-lt.parquet"
+PARQUET_FILE = f"{PATH}/{SOURCE_LANG}-{TARGET_LANG}.parquet"
 if os.path.exists(PARQUET_FILE):
     print(f"Dataset already saved to a parquet file ({PARQUET_FILE}).")
     if input("Do you want to overwrite it? (y/N): ").lower() != "y":
@@ -44,9 +81,9 @@ if os.path.exists(PARQUET_FILE):
 
 # read the dataset into a pandas DataFrame
 data = {}
-for suff in ["en", "lt", "scores"]:
-    print(f"Reading '{UNZIP_PATH}/{FILE_PREFIX}.{suff}'...")
-    with open(f"{UNZIP_PATH}/{FILE_PREFIX}.{suff}") as f:
+for suff, file in files.items():
+    print(f"Reading '{file}'...")
+    with open(f"{file}") as f:
         data[suff] = tuple(line.strip() for line in f.readlines())
 data["scores"] = tuple(float(score) for score in data["scores"])
 
@@ -61,8 +98,8 @@ print(f"Saving the dataset to '{PARQUET_FILE}'...")
 
 schema = pa.schema(
     [
-        pa.field("en", pa.string()),
-        pa.field("lt", pa.string()),
+        pa.field(SOURCE_LANG, pa.string()),
+        pa.field(TARGET_LANG, pa.string()),
         pa.field("scores", pa.float16()),
     ]
 )

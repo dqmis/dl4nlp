@@ -79,8 +79,7 @@ def load_nllb_dataset(
     tokenizer: AutoTokenizer,
     sample: float = 100,
 ) -> dict:
-    assert source_lang in ["en"]
-    assert target_lang in ["lt"]
+    assert f"{source_lang}-{target_lang}" in dataset_path, "Dataset language mismatch"
     dataset = load_dataset(dataset_path, data_files=["*.parquet"])
     dataset = dataset["train"].shuffle(seed=42).select(range(int(len(dataset) * sample)))
     dataset = dataset.train_test_split(test_size=0.2)
