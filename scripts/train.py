@@ -5,7 +5,7 @@ from transformers import Seq2SeqTrainingArguments
 
 from src.trainer import Trainer
 from src.utils import load_config, populate_training_args
-from src.utils.datasets import DATASETS
+from src.utils.dataset import DATASETS
 
 CONFIG_DIR = Path(__file__).resolve().parent.parent / "configs"
 OUT_DIR = Path(__file__).resolve().parent.parent / "out"
@@ -25,11 +25,11 @@ def get_training_arguments(cfg: dict) -> Seq2SeqTrainingArguments:
 
 
 def get_dataset(cfg: dict, trainer) -> dict:
-    return DATASETS["helsinki"](
+    return DATASETS["nllb"](
         cfg["dataset"],
         cfg["source_lang"],
         cfg["target_lang"],
-        cfg.get("prefix", ""),
+        # cfg.get("prefix", ""),
         trainer.tokenizer,
     )
 
