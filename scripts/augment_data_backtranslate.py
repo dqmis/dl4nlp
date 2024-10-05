@@ -11,7 +11,7 @@ def main(dataset_path: str, output_path: str) -> None:
     with open(dataset_path) as f:
         dataset = f.readlines()
 
-    dataset = dataset[:100]
+    dataset = dataset[:232984]
     print(f"Data loaded with {len(dataset)} lines")
 
     augmentor = BacktranslateAugmentor(
@@ -20,15 +20,15 @@ def main(dataset_path: str, output_path: str) -> None:
         from_model="Helsinki-NLP/opus-mt-fr-en",
         to_model="Helsinki-NLP/opus-mt-en-fr",
     )
+   
 
-    augmented_data = []
+    for idx, batch in enumerate(tqdm(batch_data(dataset, 512))):
+        if idx < 29:
+            continue
+        augmented_batch = augmentor(batch)
 
-    for batch in tqdm(batch_data(dataset, 10)):
-        augmented_batch = augmentor(dataset)
-        augmented_data.extend(augmented_batch)
-
-    with open(output_path, "w") as f:
-        f.writelines(s + "\n" for s in augmented_data)
+        with open(f"out/backtranslated/{idx}.txt", "w") as f:
+            f.writelines(s + "\n" for s in augmented_batch)
 
 
 if __name__ == "__main__":
