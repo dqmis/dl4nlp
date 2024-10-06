@@ -8,8 +8,8 @@ def main(dataset_path: str, output_path: str) -> None:
     augmentor = BacktranslateAugmentor(
         lang_from="lt",
         lang_to="en",
-        from_model="Helsinki-NLP/opus-mt-tc-big-lt-en",
-        to_model="Helsinki-NLP/opus-mt-tc-big-en-lt",
+        from_model="Helsinki-NLP/opus-mt-fr-en",
+        to_model="Helsinki-NLP/opus-mt-en-fr",
     )
     augmented_data = augmentor(dataset)
 
@@ -18,4 +18,4 @@ def main(dataset_path: str, output_path: str) -> None:
 
 
 if __name__ == "__main__":
-    main("data/samples/lithuanian_sample.txt", "out/augmented_dataset.txt")
+    main("data/samples/NLLB.en-fr.en-sampled", "out/augmented_dataset.txt")

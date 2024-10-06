@@ -68,4 +68,5 @@ def main(config_name: str = "train_config") -> None:
 
 if __name__ == "__main__":
     config_name = sys.argv[1] if len(sys.argv) > 1 else "train_config"
+    print("Running ", config_name)
     main(config_name)
