@@ -11,7 +11,6 @@ def main(dataset_path: str, output_path: str) -> None:
     with open(dataset_path) as f:
         dataset = f.readlines()
 
-    dataset = dataset[:232984]
     print(f"Data loaded with {len(dataset)} lines")
 
     augmentor = BacktranslateAugmentor(
@@ -23,13 +22,13 @@ def main(dataset_path: str, output_path: str) -> None:
    
 
     for idx, batch in enumerate(tqdm(batch_data(dataset, 512))):
-        if idx < 29:
+        if idx < 209:
             continue
         augmented_batch = augmentor(batch)
 
-        with open(f"out/backtranslated/{idx}.txt", "w") as f:
+        with open(f"out/backtranslated-fr/{idx}.txt", "w") as f:
             f.writelines(s + "\n" for s in augmented_batch)
 
 
 if __name__ == "__main__":
-    main("data/en-lt.txt/NLLB.en-lt.lt", "out/augmented_dataset.txt")
+    main("data/NLLB.en-fr.en-sampled", "out/augmented_dataset.txt")
