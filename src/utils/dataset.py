@@ -18,8 +18,8 @@ def load_flores_dataset(source_lang: str, target_lang: str, tokenizer: AutoToken
         batched=True,
         fn_kwargs={
             "tokenizer": tokenizer,
-            "source_lang": "eng",
-            "target_lang": "lit",
+            "source_lang": source_lang,
+            "target_lang": target_lang,
         },
     )
     return processed_dataset
@@ -39,8 +39,8 @@ def load_ntrex_dataset(source_lang: str, target_lang: str, tokenizer: AutoTokeni
         batched=True,
         fn_kwargs={
             "tokenizer": tokenizer,
-            "source_lang": "eng",
-            "target_lang": "lit",
+            "source_lang": source_lang,
+            "target_lang": target_lang,
         },
     )
     return processed_dataset
