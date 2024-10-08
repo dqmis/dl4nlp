@@ -28,12 +28,28 @@ pip install poetry
 poetry install
 poetry run pre-commit install
 ```
+# Steps to run
 
-- ### Data Preparation
+- ### Download the data
+
+Download the dataset of the language You would like to test. Choose source and target language.
 
 ```bash
 python scripts/download_nllb.py
 ```
+
+- ### Augment the downloaded data
+
+Based on the chosen language, 
+
+1. Change `lang_from` and `lang_to` as well as `from_model` and `to_model` to your chosen language.
+
+2. Provide the correct path to your dataset in main function argument.
+
+```bash
+python scripts/augment_data_backtranslate.py
+```
+
 
 - ### Training
 
