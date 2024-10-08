@@ -36,6 +36,8 @@ class GeminiAPI(BaseLLMApi):
                 ).text
 
                 matches = self._output_regexp.findall(generated_text)
+                if len(matches) > 1:
+                    matches = matches[:1]
                 return [match.strip() + "\n" for match in matches]
             except Exception as e:
                 attempt += 1
