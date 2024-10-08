@@ -63,7 +63,7 @@ def load_helsinki_dataset(
 ) -> dict:
     dataset = load_dataset(dataset_name, f"{source_lang}-{target_lang}")
 
-    dataset = dataset["train"].select(range(232984))
+    dataset = dataset["train"]
     dataset = dataset.train_test_split(test_size=0.2)
 
     # Apply the preprocess function to dataset
