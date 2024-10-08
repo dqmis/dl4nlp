@@ -19,16 +19,13 @@ def main(dataset_path: str, output_path: str) -> None:
         from_model="Helsinki-NLP/opus-mt-fr-en",
         to_model="Helsinki-NLP/opus-mt-en-fr",
     )
-   
 
     for idx, batch in enumerate(tqdm(batch_data(dataset, 512))):
-        if idx < 209:
-            continue
         augmented_batch = augmentor(batch)
 
-        with open(f"out/backtranslated-fr/{idx}.txt", "w") as f:
+        with open(f"{output_path}/{idx}.txt", "w") as f:
             f.writelines(s + "\n" for s in augmented_batch)
 
 
 if __name__ == "__main__":
-    main("data/NLLB.en-fr.en-sampled", "out/augmented_dataset.txt")
+    main("data/NLLB.en-fr.en-sampled", "out/backtranslated-fr")
