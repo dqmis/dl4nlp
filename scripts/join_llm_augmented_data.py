@@ -38,9 +38,9 @@ def main(files_path_root: str) -> None:
 
         output_files.extend(augmented_lines)
 
-    with open("out/NLLB.en-lt.lt.txt", "w") as f:
+    with open("out/llm-NLLB.en-fr.fr.txt", "w") as f:
         f.writelines(output_files)
 
 
 if __name__ == "__main__":
-    main("out/NLLB.en-lt.lt")
+    main("out/llm-NLLB.en-fr.fr")
