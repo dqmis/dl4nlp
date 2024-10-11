@@ -1,12 +1,10 @@
+import os
 import glob
 import pandas as pd
 
-if __name__ == "__main__":
-    backtranslation_directory = "out/backtranslated-ee"
-    output_file_name = "out/nllb-ee-backtranslated.txt"
-    parquet_file_name = "data/bt-opus.nllb.en-ee/nllb-ee-backtranslated.parquet"
 
-    files = glob.glob(f"{backtranslation_directory}/*")
+def main(data_dir: str, original_data_dir: str, output_parquet_file: str) -> None:
+    files = glob.glob(f"{data_dir}/*")
     files.sort(key=lambda x: int(x.split(".txt")[0].split("/")[-1]))
 
     all_data = []
@@ -16,7 +14,7 @@ if __name__ == "__main__":
             data = f.readlines()
 
         if len(data) != 100:
-            with open(f"{backtranslation_directory}/{idx}.txt", "r") as f:
+            with open(f"{data_dir}/{idx}.txt", "r") as f:
                 org_data = f.readlines()
 
             all_data.extend(org_data)
@@ -24,14 +22,39 @@ if __name__ == "__main__":
 
         all_data.extend(data)
 
-    # Write the data to a text file
-    with open(output_file_name, "w") as f:
-        f.writelines(all_data)
+    # Read the original sentences
+    with open(original_data_dir, "r") as f:
+        original_data = f.readlines()
 
-    # Convert the data to a pandas DataFrame
-    df = pd.DataFrame(all_data, columns=["text"])
+    # Create a DataFrame with the backtranslated and original data
+    bt_df = pd.DataFrame(all_data, columns=["en"])
+    orig_df = pd.DataFrame(original_data, columns=["ee"]).iloc[: bt_df.shape[0]]
 
-    # Save the DataFrame to a Parquet file
-    df.to_parquet(parquet_file_name)
+    assert bt_df.shape == orig_df.shape, "Data shapes do not match"
 
-    print(f"Parquet file saved as {parquet_file_name}")
+    print(f"Backtranslated data shape: {bt_df.shape}")
+    print(f"Original data shape: {orig_df.shape}")
+
+    # Concatenate the two dataframes into one
+    df = pd.concat([orig_df, bt_df], axis=1)
+
+    # Create directory if it does not exist
+    os.makedirs(os.path.dirname(output_parquet_file), exist_ok=True)
+
+    df.to_parquet(output_parquet_file)
+
+    print(f"Parquet file saved at: {output_parquet_file}")
+
+
+if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("--data_dir", type=str, required=True)
+    parser.add_argument("--original_data_dir", type=str, required=True)
+    parser.add_argument("--output_parquet_file", type=str, required=True)
+
+    args = parser.parse_args()
+
+    main(args.data_dir, args.original_data_dir, args.output_parquet_file)

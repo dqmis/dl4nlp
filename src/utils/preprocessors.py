@@ -30,7 +30,11 @@ def preprocess_ntrex_function(
 
 
 def preprocess_helsinki_function(
-    examples: dict, tokenizer: AutoTokenizer, source_lang: str, target_lang: str, prefix: str
+    examples: dict,
+    tokenizer: AutoTokenizer,
+    source_lang: str,
+    target_lang: str,
+    prefix: str,
 ) -> dict:
     """
     Preprocess the given examples with the given tokenizer, source language, target language, and prefix. # noqa
