@@ -1,4 +1,3 @@
-from tqdm import tqdm
 from transformers import pipeline
 
 from src.augmentors.base_augmentor import BaseAugmentor

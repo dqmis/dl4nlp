@@ -151,10 +151,14 @@ class Trainer:
         if not self._fast_eval:
             chrf_score = chrf.compute(predictions=decoded_preds, references=decoded_labels)
             comet_score = comet.compute(
-                predictions=decoded_preds, references=decoded_labels, sources=decoded_sources
+                predictions=decoded_preds,
+                references=decoded_labels,
+                sources=decoded_sources,
             )
             bertscore_result = bertscore.compute(
-                predictions=decoded_preds, references=decoded_labels, lang=self._target_lang
+                predictions=decoded_preds,
+                references=decoded_labels,
+                lang=self._target_lang,
             )
             result["chrf"] = chrf_score["score"]
             result["comet"] = np.array(comet_score["scores"]).mean()
