@@ -30,6 +30,16 @@ poetry run pre-commit install
 ```
 # Steps to run
 
+- ### Connect to Snellius and request resources
+
+```bash
+# snellius specific - ask for resources and shell
+# don't forget to allocate enough time
+srun --partition=gpu --gpus=1 --ntasks=1 --cpus-per-task=18  --time=00:01:00 --pty bash -i
+
+conda activate venv
+```
+
 - ### Download the data
 
 Download the dataset of the language You would like to test. Choose source and target language.
@@ -50,14 +60,16 @@ Based on the chosen language,
 python scripts/augment_data_backtranslate.py
 ```
 
+- ### Convert txt file into parquet
+
+Create a separate directory and convert created `.txt.` file to `.parquet`
+
+```bash
+python scripts/convert_to_parquet.py
+```
 
 - ### Training
 
 ```bash
-# snel specific - ask for resources and shell
-# don't forget to allocate enough time
-srun --partition=gpu --gpus=1 --ntasks=1 --cpus-per-task=18  --time=00:01:00 --pty bash -i
-
-conda activate venv
-python scripts/train.py
+python scripts/train.py <name_of_the_config>
 ```
