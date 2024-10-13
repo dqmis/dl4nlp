@@ -9,7 +9,7 @@ import tqdm
 
 default = "en"
 SOURCE_LANG = input(f"Enter the source language [{default}]: ") or default
-default = "lt"
+default = "ee"
 TARGET_LANG = input(f"Enter the target language [{default}]: ") or default
 
 PATH = Path(__file__).parent.parent / f"data/opus.nllb.{SOURCE_LANG}-{TARGET_LANG}"
@@ -57,7 +57,10 @@ else:
 
 # read first three lines of the dataset
 files = {}
-for file_prefix in (f"NLLB.{SOURCE_LANG}-{TARGET_LANG}", f"NLLB.{TARGET_LANG}-{SOURCE_LANG}"):
+for file_prefix in (
+    f"NLLB.{SOURCE_LANG}-{TARGET_LANG}",
+    f"NLLB.{TARGET_LANG}-{SOURCE_LANG}",
+):
     for suff in [SOURCE_LANG, TARGET_LANG, "scores"]:
         file = f"{UNZIP_PATH}/{file_prefix}.{suff}"
         if not os.path.exists(file):

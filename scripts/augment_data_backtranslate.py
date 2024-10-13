@@ -14,11 +14,8 @@ def main(dataset_path: str, output_path: str, lang_from: str, lang_to: str) -> N
 
     dataset_size = len(dataset)
 
-    # Take about 10% of the dataset
-    if 250_000 > len(dataset) / 10:
-        dataset = dataset[: int(len(dataset) / 10)]
-    else:
-        dataset = dataset[:250_000]
+    # Take size of 250_000
+    dataset = dataset[:250_000]
 
     print(
         f"Data loaded size {len(dataset)} lines, old dataset size: {dataset_size}. Fraction: {len(dataset) / dataset_size}"
@@ -38,6 +35,8 @@ def main(dataset_path: str, output_path: str, lang_from: str, lang_to: str) -> N
 
         with open(f"{output_path}/{idx}.txt", "w") as f:
             f.writelines(s + "\n" for s in augmented_batch)
+
+    print("Backtranslation done!")
 
 
 if __name__ == "__main__":

@@ -3,7 +3,9 @@ import glob
 import pandas as pd
 
 
-def main(data_dir: str, original_data_dir: str, output_parquet_file: str) -> None:
+def main(
+    data_dir: str, original_data_dir: str, output_parquet_file: str, original_lang: str
+) -> None:
     files = glob.glob(f"{data_dir}/*")
     files.sort(key=lambda x: int(x.split(".txt")[0].split("/")[-1]))
 
@@ -28,7 +30,7 @@ def main(data_dir: str, original_data_dir: str, output_parquet_file: str) -> Non
 
     # Create a DataFrame with the backtranslated and original data
     bt_df = pd.DataFrame(all_data, columns=["en"])
-    orig_df = pd.DataFrame(original_data, columns=["ee"]).iloc[: bt_df.shape[0]]
+    orig_df = pd.DataFrame(original_data, columns=[original_lang]).iloc[: bt_df.shape[0]]
 
     assert bt_df.shape == orig_df.shape, "Data shapes do not match"
 
@@ -54,7 +56,8 @@ if __name__ == "__main__":
     parser.add_argument("--data_dir", type=str, required=True)
     parser.add_argument("--original_data_dir", type=str, required=True)
     parser.add_argument("--output_parquet_file", type=str, required=True)
+    parser.add_argument("--orig_lang", type=str, required=True)
 
     args = parser.parse_args()
 
-    main(args.data_dir, args.original_data_dir, args.output_parquet_file)
+    main(args.data_dir, args.original_data_dir, args.output_parquet_file, args.orig_lan)
