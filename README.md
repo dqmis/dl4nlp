@@ -10,11 +10,12 @@ The project requires `Python ^3.11` version. Other dependencies are listed in th
 
 - ### Installation
 
-The project uses Poetry to manage dependencies. To install the dependencies, run the following command:
+The project uses Poetry to manage dependencies. To install the dependencies on Snellius, run the following command:
 
 ```bash
 # snel specific
 /sw/arch/RHEL8/EB_production/2023/software/Anaconda3/2023.07-2/bin/conda init bash
+
 # restart shell
 conda create python=3.11 -n venv
 conda activate venv
@@ -40,7 +41,7 @@ srun --partition=gpu --gpus=1 --ntasks=1 --cpus-per-task=18  --time=00:01:00 --p
 conda activate venv
 ```
 
-or run a file with the job specification that will run jobs in the background on Snellius. This allows you to submit jobs that will keep running even if you disconnect from the server. Example of this file is `train_job.slurm`, You can adjust it to Your needs and run:
+or `run a file with the job specification` that will run jobs in the background on Snellius. This allows you to submit jobs that will keep running even if you disconnect from the server. Example of this file is `train_job.slurm`, You can adjust it to Your needs and run:
 
 ```bash
 sbatch train_job.slurm
@@ -69,7 +70,7 @@ To augment the dataset by using backtranslation, run the following script and pr
 - **lang_from**
 - **lang_to**
 
-Set the language_from to the target language (e.g. Estonian) and language_to usually is English.
+Set the language_from to the target language (e.g. Estonian) and language_to which usually is English.
 
 Example:
 
@@ -88,7 +89,7 @@ sbatch backtranslate_job.slurm
 Convert generated `.txt` files from backtranslation to `.parquet` file for training.
 
 ```bash
-python scripts/convert_to_parquet.py --data_dir=out/backtranslated-ee --original_data_dir=data/opus.nllb.en-ee/en-ee.txt/NLLB.en-ee.ee --output_parquet_file=data/bt-opus.nllb.en-ee/nllb-ee-backtranslated.parquet
+python scripts/convert_to_parquet.py --data_dir=out/backtranslated-ee --original_data_dir=data/opus.nllb.en-ee/en-ee.txt/NLLB.en-ee.ee --output_parquet_file=data/bt-opus.nllb.en-ee/nllb-ee-backtranslated.parquet --orig_lang=ee
 ```
 
 - ### Training
@@ -99,8 +100,64 @@ Run the training script with the name of the configuration file as an argument:
 python scripts/train.py train_bt_ee.yaml
 ```
 
-Or run the training script with the job specification file:
+Or run the training script with the job specification file and adjust it to your needs:
 
 ```bash
 sbatch train_job.slurm
 ```
+
+- ### Augment LLM data
+
+To augment the dataset by using the LLM, run the following script and provide all the necessary arguments:
+
+- **dataset_path**
+- **output_path**
+- **lang_from**
+
+Set the language_from to the target language (e.g. Estonian, Afrikans).
+
+```bash
+python scripts/augment_data_llm.py --dataset_path=data/opus.nllb.en-ee/en-ee.txt/NLLB.en-ee.ee --output_path=out/llm-ee --lang_from=Estonian
+```
+
+Or run the script with the job specification file and adjust it to your needs:
+
+```bash
+sbatch augment_llm_job.slurm
+```
+
+- ### Join LLM augmented data
+
+To join the LLM augmented data with the original data, run the following script and provide all the necessary arguments:
+
+- **dataset_path**
+- **output_path**
+
+```bash
+python scripts/join_llm_augmented_data.py --dataset_path=out/llm-ee --output_file_path=data/llm.nllb.en-ee/nllb-ee-llm.txt
+```
+
+- ### Translate LLM data
+
+To translate the data using LLM model, run the following script and provide all the necessary arguments:
+
+- **dataset_path**
+- **output_path**
+
+```bash
+python scripts/translate_data_llm.py --dataset_path=data/opus.nllb.en-ee/en-ee.txt/NLLB.en-ee.en --output_path=out/translated-llm-ee
+```
+
+Or run the script with the job specification file and adjust it to your needs:
+
+```bash
+sbatch translate_llm_job.slurm
+```
+
+- ### Join LLM translated data
+
+Run the same script as for joining LLM augmented data, but adjust parameters.
+
+- ### Training with LLM augmented data and LLM translated data
+
+To run the training script with the LLM augmented data and LLM translated data, run the same script as for training backtranslation data, but adjust the configuration files.
