@@ -1,6 +1,6 @@
 import sys
 from pathlib import Path
-
+import wandb
 from transformers import Seq2SeqTrainingArguments
 
 from src.trainer import Trainer
@@ -9,6 +9,8 @@ from src.utils.dataset import DATASETS
 
 CONFIG_DIR = Path(__file__).resolve().parent.parent / "configs"
 OUT_DIR = Path(__file__).resolve().parent.parent / "out"
+
+wandb.init(project="dl4nlp")
 
 
 def build_run_name(config: dict) -> str:
@@ -49,9 +51,11 @@ def evaluate_ntrex(trainer, cfg: dict) -> None:
 
 
 def main(config_name: str = "train_config") -> None:
-    cfg = load_config((CONFIG_DIR / f"{config_name}.yaml").resolve())
+    cfg = load_config((CONFIG_DIR / f"{config_name}").resolve())
     trainer = Trainer(
-        cfg["checkpoint"], source_lang=cfg["source_lang"], target_lang=cfg["target_lang"]
+        cfg["checkpoint"],
+        source_lang=cfg["source_lang"],
+        target_lang=cfg["target_lang"],
     )
 
     # Get training arguments and dataset
@@ -64,6 +68,8 @@ def main(config_name: str = "train_config") -> None:
     # Evaluate on FLORES dataset
     evaluate_ntrex(trainer, cfg)
     evaluate_flores(trainer, cfg)
+
+    print("Training done!")
 
 
 if __name__ == "__main__":

@@ -8,12 +8,11 @@ from src.utils.preprocessors import (
 )
 
 
-def load_flores_dataset(
-    source_lang: str, target_lang: str, tokenizer: AutoTokenizer
-) -> dict:
+def load_flores_dataset(source_lang: str, target_lang: str, tokenizer: AutoTokenizer) -> dict:
     dataset = load_dataset(
         "facebook/flores",
         f"{source_lang}_Latn-{target_lang}_Latn",
+        trust_remote_code=True,
     )
     processed_dataset: dict = dataset.map(
         preprocess_flores_function,
@@ -27,18 +26,12 @@ def load_flores_dataset(
     return processed_dataset
 
 
-def load_ntrex_dataset(
-    source_lang: str, target_lang: str, tokenizer: AutoTokenizer
-) -> dict:
+def load_ntrex_dataset(source_lang: str, target_lang: str, tokenizer: AutoTokenizer) -> dict:
     source_dataset = load_dataset("davidstap/NTREX", f"{source_lang}_Latn")["test"]
     target_dataset = load_dataset("davidstap/NTREX", f"{target_lang}_Latn")["test"]
 
-    source_dataset = source_dataset.rename_column(
-        "text", f"sentence_{source_lang}_Latn"
-    )
-    target_dataset = target_dataset.rename_column(
-        "text", f"sentence_{target_lang}_Latn"
-    )
+    source_dataset = source_dataset.rename_column("text", f"sentence_{source_lang}_Latn")
+    target_dataset = target_dataset.rename_column("text", f"sentence_{target_lang}_Latn")
 
     dataset = concatenate_datasets([source_dataset, target_dataset], axis=1)
 

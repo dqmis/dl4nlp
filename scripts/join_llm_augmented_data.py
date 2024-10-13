@@ -1,3 +1,4 @@
+import os
 import glob
 
 
@@ -8,8 +9,10 @@ def augmentation_valid(lines: list[str]) -> bool:
     return True
 
 
-def main(files_path_root: str) -> None:
-    all_files_in_path = glob.glob(files_path_root + "/*")
+def main(dataset_path: str, outut_file_path: str) -> None:
+    print("Starting to join files!")
+
+    all_files_in_path = glob.glob(dataset_path + "/*")
     augmented_files = sorted(
         [filename for filename in all_files_in_path if "original" not in filename]
     )
@@ -38,9 +41,22 @@ def main(files_path_root: str) -> None:
 
         output_files.extend(augmented_lines)
 
-    with open("out/llm-NLLB.en-fr.fr.txt", "w") as f:
+    os.makedirs(os.path.dirname(outut_file_path), exist_ok=True)
+
+    with open(outut_file_path, "w") as f:
         f.writelines(output_files)
+
+    print("Finished joining files!")
 
 
 if __name__ == "__main__":
-    main("out/llm-NLLB.en-fr.fr")
+    import argparse
+
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("--dataset_path", type=str, required=True)
+    parser.add_argument("--output_file_path", type=str, required=True)
+
+    args = parser.parse_args()
+
+    main(args.dataset_path, args.output_file_path)
