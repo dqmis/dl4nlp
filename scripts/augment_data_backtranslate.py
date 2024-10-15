@@ -9,6 +9,8 @@ def batch_data(data: list[str], batch_size: int) -> list[list[str]]:
 
 
 def main(dataset_path: str, output_path: str, lang_from: str, lang_to: str) -> None:
+    print(f"Backtranslating {dataset_path} to {output_path} from {lang_from} to {lang_to}")
+
     with open(dataset_path) as f:
         dataset = f.readlines()
 

@@ -57,6 +57,7 @@ def main(config_name: str = "train_config") -> None:
         source_lang=cfg["source_lang"],
         target_lang=cfg["target_lang"],
     )
+    print(f"Training model: {cfg['checkpoint']}")
 
     # Get training arguments and dataset
     training_args = get_training_arguments(cfg)

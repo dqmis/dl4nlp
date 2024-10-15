@@ -6,6 +6,8 @@ import pandas as pd
 def main(
     data_dir: str, original_data_dir: str, output_parquet_file: str, original_lang: str
 ) -> None:
+    print(f"Reading data from: {data_dir}")
+
     files = glob.glob(f"{data_dir}/*")
     files.sort(key=lambda x: int(x.split(".txt")[0].split("/")[-1]))
 
@@ -60,4 +62,4 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    main(args.data_dir, args.original_data_dir, args.output_parquet_file, args.orig_lan)
+    main(args.data_dir, args.original_data_dir, args.output_parquet_file, args.orig_lang)

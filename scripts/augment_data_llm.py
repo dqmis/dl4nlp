@@ -14,13 +14,19 @@ def batch_data(data: list[str], batch_size: int) -> list[list[str]]:
 
 
 def main(dataset_path: str, output_path: str, language_from: str) -> None:
-    print("Starting data augmentation for LLM ...")
+    print(f"Augmenting {dataset_path} to {output_path} with LLM in {language_from}")
+
     with open(dataset_path) as f:
         dataset = f.readlines()
 
-    print(f"Dataset size: {len(dataset)}")
+    dataset_size = len(dataset)
+
     # Take size of 250_000
     dataset = dataset[:250_000]
+
+    print(
+        f"Data loaded size {len(dataset)} lines, old dataset size: {dataset_size}. Fraction: {len(dataset) / dataset_size}"
+    )
 
     dataset = batch_data(dataset, 100)
     print(f"Number of batches: {len(dataset)}")
