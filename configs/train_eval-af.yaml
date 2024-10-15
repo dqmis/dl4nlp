@@ -1,9 +1,9 @@
-checkpoint: 'Helsinki-NLP/opus-mt-en-ee'
+checkpoint: 'Helsinki-NLP/opus-mt-en-af'
 source_lang: 'en'
-target_lang: 'ee'
+target_lang: 'af'
 source_lang_flores: 'eng'
-target_lang_flores: 'est'
-dataset: 'data_train/opus.nllb.en-ee'
+target_lang_flores: 'afr'
+dataset: 'data_train/opus.nllb.en-af'
 only_eval: True
 training_args:
   learning_rate: 0.00002
