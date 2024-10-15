@@ -6,11 +6,11 @@
 #SBATCH --gpus=1                        # Number of GPUs
 #SBATCH --ntasks=1                      # Number of tasks
 #SBATCH --cpus-per-task=18              # Number of CPU cores per task
-#SBATCH --time=04:00:00                 # Max runtime
+#SBATCH --time=06:00:00                 # Max runtime
 
 # Activate the conda environment
 source ~/.bashrc  # Ensures conda is available
 conda activate venv
 
 # Run the Python training script with the configuration file
-python scripts/augment_data_llm.py --dataset_path=data/opus.nllb.en-ee/en-ee.txt/NLLB.en-ee.ee --output_path=out/augmented-llm-ee --lang_from=Estonian
+python scripts/augment_data_llm.py --dataset_path=data/opus.nllb.en-ee/en-ee.txt/NLLB.en-ee.en --output_path=out/augmented-llm-ee --lang_from=Estonian

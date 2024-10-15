@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH --job-name=train_af_bt          # Job name
-#SBATCH --output=out/en_af/train_model.out        # Standard output file
-#SBATCH --error=out/en_af/train_model.err         # Standard error file
+#SBATCH --job-name=train_ee_bt          # Job name
+#SBATCH --output=out/en_ee/train_bt.out        # Standard output file
+#SBATCH --error=out/en_ee/train_bt.err         # Standard error file
 #SBATCH --partition=gpu                 # Partition (queue) name
 #SBATCH --gpus=1                        # Number of GPUs
 #SBATCH --ntasks=1                      # Number of tasks
@@ -13,4 +13,4 @@ source ~/.bashrc  # Ensures conda is available
 conda activate venv
 
 # Run the Python training script with the configuration file
-python scripts/train.py train_bt_af.yaml
+python scripts/train.py train_bt-ee.yaml
